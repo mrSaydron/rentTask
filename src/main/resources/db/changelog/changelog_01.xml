@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.9.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="0000" author="aleksey">
+        <sql>
+            create sequence seq_car
+            MINVALUE 100
+            NO MAXVALUE
+            CACHE 1;
+
+            create table car
+            (
+            id bigint default nextval('seq_car' :: regclass) primary key not null,
+            number text not null,
+            manufacturer text,
+            brand text,
+            active boolean default true not null
+            );
+            create unique index idx_car_number on car (number);
+
+            comment on table car is 'Машины';
+
+            comment on column car.id is 'Идентификатор автомобиля';
+            comment on column car.number is 'Регистрационный номер';
+            comment on column car.manufacturer is 'Производитель';
+            comment on column car.brand is 'Марка';
+            comment on column car.active is 'Статус машины';
+        </sql>
+    </changeSet>
+
+    <changeSet id="0001" author="aleksey">
+        <sql>
+            create sequence seq_rent
+            MINVALUE 100
+            NO MAXVALUE
+            CACHE 1;
+
+            create table rent
+            (
+            id bigint default nextval('seq_rent' :: regclass) primary key not null,
+            renter_name text not null,
+            took_date timestamp without time zone not null ,
+            returned_date timestamp without time zone,
+            car_id bigint not null
+            );
+            create index idx_rent_car_id on rent (car_id);
+
+            comment on table rent is 'Запись об оренде машины';
+
+            comment on column rent.id is 'Идентификатор';
+            comment on column rent.renter_name is 'Имя арендатора';
+            comment on column rent.took_date is 'Дата и время взятия автомобиля в аренду';
+            comment on column rent.returned_date is 'Дата и время возврата автомобиля';
+            comment on column rent.car_id is 'Идентификатор автомобиля взятого в аренду';
+        </sql>
+    </changeSet>
+
+    <changeSet id="0002" author="aleksey">
+        <loadData file="db/changelog/data/car.csv" separator=";" tableName="car">
+            <column name="id" type="numeric"/>
+            <column name="number" type="string"/>
+            <column name="manufacturer" type="string"/>
+            <column name="brand" type="string"/>
+        </loadData>
+    </changeSet>
+
+    <changeSet id="0003" author="aleksey">
+        <loadData file="db/changelog/data/rent.csv" separator=";" tableName="rent">
+            <column name="id" type="numeric"/>
+            <column name="renter_name" type="string"/>
+            <column name="took_date" type="date"/>
+            <column name="returned_date" type="date"/>
+            <column name="car_id" type="numeric"/>
+        </loadData>
+    </changeSet>
+
+</databaseChangeLog>
